@@ -35,23 +35,30 @@ class AlignmentError(Exception):
     pass
 
 
-def _split_into_sentences(text: str) -> List[str]:
+def _split_into_sentences(text: str, max_words: int = 5) -> List[str]:
     """
-    Split text into sentences for alignment.
+    Split text into segments for alignment.
 
     Args:
         text: Input text
+        max_words: Maximum words per segment (default: 5)
 
     Returns:
-        List of sentences
+        List of text segments
     """
-    # Split on sentence-ending punctuation while keeping the punctuation
-    sentences = re.split(r'(?<=[.!?。！？])\s*', text.strip())
+    # Get all words from the text
+    words = text.strip().split()
 
-    # Filter empty strings and strip whitespace
-    sentences = [s.strip() for s in sentences if s.strip()]
+    if not words:
+        return []
 
-    return sentences
+    segments = []
+
+    for i in range(0, len(words), max_words):
+        segment = " ".join(words[i:i + max_words])
+        segments.append(segment)
+
+    return segments
 
 
 def _normalize_segments(
