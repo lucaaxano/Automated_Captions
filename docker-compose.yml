@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  subtitle-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: subtitle-microservice
+    ports:
+      - "8000:8000"
+    environment:
+      - API_KEY=${API_KEY:-change-me-in-production}
+      - TEMP_DIR=/tmp/subtitle-service
+      - MAX_VIDEO_DURATION=60
+      - LOG_LEVEL=INFO
+    volumes:
+      - subtitle-temp:/tmp/subtitle-service
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  subtitle-temp:
+    driver: local
