@@ -18,8 +18,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 # Install Python dependencies
+# IMPORTANT: numpy must be installed BEFORE aeneas (aeneas requires numpy at install time)
 COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir numpy==1.26.2 && \
     pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
