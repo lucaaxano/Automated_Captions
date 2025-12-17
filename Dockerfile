@@ -6,22 +6,28 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PYTHONPATH=/app
 
-# Install system dependencies
+# Install system dependencies including build tools for compiling C extensions
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ffmpeg \
     espeak-ng \
     libespeak-ng1 \
+    libespeak-ng-dev \
     git \
+    build-essential \
+    gcc \
+    python3-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Create app directory
 WORKDIR /app
 
 # Install Python dependencies
-# IMPORTANT: numpy must be installed BEFORE aeneas, and aeneas needs --no-build-isolation
-# to see the pre-installed numpy (PEP 517 build isolation workaround)
+# IMPORTANT:
+# 1. Pin setuptools < 60.0 to keep distutils available (required by numpy.distutils/aeneas)
+# 2. Install numpy BEFORE aeneas
+# 3. Use --no-build-isolation so aeneas can see pre-installed numpy
 COPY requirements.txt .
-RUN pip install --no-cache-dir --upgrade pip && \
+RUN pip install --no-cache-dir "setuptools<60.0" wheel && \
     pip install --no-cache-dir numpy==1.26.2 && \
     pip install --no-cache-dir --no-build-isolation aeneas==1.7.3.0 && \
     pip install --no-cache-dir -r requirements.txt
